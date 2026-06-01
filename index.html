@@ -420,26 +420,25 @@ puntos:0
 
 function iniciarDatos(){
 
-const guardado =
-localStorage.getItem("ligaDatos");
+const guardado = localStorage.getItem("ligaDatos");
 
 if(guardado){
+  jugadores = JSON.parse(guardado);
+} else {
+  jugadores = {};
 
-jugadores =
-JSON.parse(guardado);
+  EQUIPO_A.forEach(j=>{
+    jugadores[j] = crearJugador(j,"A");
+  });
 
-return;
+  EQUIPO_B.forEach(j=>{
+    jugadores[j] = crearJugador(j,"B");
+  });
+
+  guardarDatos();
 }
 
-EQUIPO_A.forEach(j=>{
-jugadores[j]=crearJugador(j,"A");
-});
-
-EQUIPO_B.forEach(j=>{
-jugadores[j]=crearJugador(j,"B");
-});
-
-guardarDatos();
+renderizar(); // 🔥 OBLIGATORIO
 }
   function calcularPuntos(j){
 
@@ -828,9 +827,9 @@ alert("Mes reiniciado correctamente.");
 
 }
 
-window.onload = ()=>{
-
-iniciarDatos();
+window.onload = () => {
+  iniciarDatos();
+};
 
 Object.values(jugadores)
 .forEach(j=>{
