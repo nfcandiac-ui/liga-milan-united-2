@@ -299,50 +299,72 @@ font-weight:bold;
 Liga Milan United FC © 2026
 </footer>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  const firebaseConfig = {
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  getDocs 
+} from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
   apiKey: "TU_API_KEY",
   authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
+  projectId: "TU_PROJECT_ID"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROJECT_ID",
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🔥 GUARDAR CAMPEÓN
+window.guardarCampeon = async function(nombre, puntos) {
+  await addDoc(collection(db, "campeones"), {
+    nombre,
+    puntos,
+    fecha: new Date().toLocaleDateString()
+  });
+
+  cargarHistorial();
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+// 🔥 CARGAR HISTORIAL
+window.cargarHistorial = async function() {
+  const ul = document.getElementById("historial");
+  ul.innerHTML = "";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyBin3BZQABrtgCgIi7PAnumHs473JVXagc",
-    authDomain: "liga-milan-united.firebaseapp.com",
-    projectId: "liga-milan-united",
-    storageBucket: "liga-milan-united.firebasestorage.app",
-    messagingSenderId: "395474896963",
-    appId: "1:395474896963:web:a7ff5386d47db873e7ecf6",
-    measurementId: "G-7N2TTWV7VC"
-  };
+  const snapshot = await getDocs(collection(db, "campeones"));
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  let data = [];
+
+  snapshot.forEach(doc => {
+    data.push(doc.data());
+  });
+
+  if(data.length === 0){
+    ul.innerHTML = "<li>No hay campeones aún</li>";
+    return;
+  }
+
+  data.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.fecha} - ${item.nombre} (${item.puntos} pts)`;
+    ul.appendChild(li);
+  });
+
+  const ultimo = data[data.length - 1];
+
+  document.getElementById("ultimoCampeon").textContent =
+  `🏆 Último campeón: ${ultimo.nombre}`;
+};
+
+window.onload = () => {
+  cargarHistorial();
+};
+
+window.cargarHistorial = cargarHistorial;
+window.guardarCampeon = guardarCampeon;
+
 </script>
 
 <script>
