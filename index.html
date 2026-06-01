@@ -169,7 +169,51 @@ button{
 width:100%;
 }
 
+/* EQUIPO A */
+
+.oro{
+background:gold !important;
+color:black;
+font-weight:bold;
 }
+
+.plata{
+background:silver !important;
+color:black;
+font-weight:bold;
+}
+
+.descenso{
+background:#ff8a8a !important;
+font-weight:bold;
+}
+
+.descenso2{
+background:#dc3545 !important;
+font-weight:bold;
+}
+
+/* EQUIPO B */
+
+.ascenso{
+background:#90EE90 !important;
+color:black;
+font-weight:bold;
+}
+
+.ascenso2{
+background:#7CFC00 !important;
+color:black;
+font-weight:bold;
+}
+
+/* TABLA GENERAL */
+
+.bronce{
+background:#cd7f32 !important;
+font-weight:bold;
+}
+
 </style>
 </head>
 
@@ -490,40 +534,64 @@ guardarDatos();
 
 renderizar();
 }
-  function renderizar(){
+ function renderizar(){
 
 const bodyA =
-document.querySelector(
-"#tablaA tbody"
-);
+document.querySelector("#tablaA tbody");
 
 const bodyB =
-document.querySelector(
-"#tablaB tbody"
-);
+document.querySelector("#tablaB tbody");
 
 bodyA.innerHTML = "";
 bodyB.innerHTML = "";
 
-EQUIPO_A.forEach((nombre,index)=>{
+/* EQUIPO A ORDENADO */
 
-bodyA.appendChild(
-crearFila(
-jugadores[nombre],
-index + 1
-)
-);
+let rankingA =
+Object.values(jugadores)
+.filter(j=>j.equipo==="A")
+.sort((a,b)=>b.puntos-a.puntos);
+
+rankingA.forEach((jugador,index)=>{
+
+let fila =
+crearFila(jugador,index+1);
+
+if(index===0)
+fila.classList.add("oro");
+
+if(index===1)
+fila.classList.add("plata");
+
+if(index===10)
+fila.classList.add("descenso");
+
+if(index===11)
+fila.classList.add("descenso2");
+
+bodyA.appendChild(fila);
 
 });
 
-EQUIPO_B.forEach((nombre,index)=>{
+/* EQUIPO B ORDENADO */
 
-bodyB.appendChild(
-crearFila(
-jugadores[nombre],
-index + 1
-)
-);
+let rankingB =
+Object.values(jugadores)
+.filter(j=>j.equipo==="B")
+.sort((a,b)=>b.puntos-a.puntos);
+
+rankingB.forEach((jugador,index)=>{
+
+let fila =
+crearFila(jugador,index+1);
+
+if(index===0)
+fila.classList.add("ascenso");
+
+if(index===1)
+fila.classList.add("ascenso2");
+
+bodyB.appendChild(fila);
 
 });
 
@@ -549,9 +617,9 @@ lista.forEach((j,index)=>{
 
 let clase = "";
 
-if(index===0) clase="rank1";
-if(index===1) clase="rank2";
-if(index===2) clase="rank3";
+if(index===0) clase="oro";
+if(index===1) clase="plata";
+if(index===2) clase="bronce";
 
 tbody.innerHTML += `
 <tr class="${clase}">
