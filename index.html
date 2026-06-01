@@ -214,6 +214,7 @@ Modo visitante
 <table id="tablaA">
 <thead>
 <tr>
+<th>#</th>
 <th>Jugador</th>
 <th>Goles</th>
 <th>Asist.</th>
@@ -406,7 +407,7 @@ renderizar();
 
 }
 
-function crearFila(jugador){
+function crearFila(jugador,posicion){
 
 const tr =
 document.createElement("tr");
@@ -415,6 +416,7 @@ const disabled =
 admin ? "" : "disabled";
 
 tr.innerHTML = `
+<td>${posicion}</td>
 <td>${jugador.nombre}</td>
 
 <td>
@@ -504,18 +506,24 @@ document.querySelector(
 bodyA.innerHTML = "";
 bodyB.innerHTML = "";
 
-EQUIPO_A.forEach(nombre=>{
+EQUIPO_A.forEach((nombre,index)=>{
 
 bodyA.appendChild(
-crearFila(jugadores[nombre])
+crearFila(
+jugadores[nombre],
+index + 1
+)
 );
 
 });
 
-EQUIPO_B.forEach(nombre=>{
+EQUIPO_B.forEach((nombre,index)=>{
 
 bodyB.appendChild(
-crearFila(jugadores[nombre])
+crearFila(
+jugadores[nombre],
+index + 1
+)
 );
 
 });
