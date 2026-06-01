@@ -205,6 +205,7 @@ Modo visitante
 </button>
 
 <div id="ultimoCampeon" class="champion"></div>
+<div id="mvpMes" class="champion"></div>
 </div>
 <div class="card">
 <h2>Equipo A</h2>
@@ -527,6 +528,7 @@ index + 1
 });
 
 actualizarTablaGeneral();
+actualizarMVP();
 
 }
 
@@ -597,6 +599,23 @@ document.getElementById(
 "ultimoCampeon"
 ).textContent =
 `🏆 Último campeón: ${ultimo.nombre}`;
+
+}
+
+}
+
+function actualizarMVP(){
+
+let ranking =
+Object.values(jugadores)
+.sort((a,b)=>b.puntos-a.puntos);
+
+if(ranking.length){
+
+document.getElementById(
+"mvpMes"
+).innerHTML =
+`⭐ MVP Actual: ${ranking[0].nombre} (${ranking[0].puntos} pts)`;
 
 }
 
