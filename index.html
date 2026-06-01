@@ -661,6 +661,48 @@ ranking[0].puntos
 
 }
 
+/* ASCENSOS Y DESCENSOS */
+
+let equipoA =
+Object.values(jugadores)
+.filter(j=>j.equipo==="A")
+.sort((a,b)=>b.puntos-a.puntos);
+
+let equipoB =
+Object.values(jugadores)
+.filter(j=>j.equipo==="B")
+.sort((a,b)=>b.puntos-a.puntos);
+
+/* 2 últimos del A */
+
+let descenso1 =
+equipoA[equipoA.length - 1];
+
+let descenso2 =
+equipoA[equipoA.length - 2];
+
+/* 2 primeros del B */
+
+let ascenso1 =
+equipoB[0];
+
+let ascenso2 =
+equipoB[1];
+
+if(descenso1 && ascenso1){
+
+descenso1.equipo = "B";
+ascenso1.equipo = "A";
+
+}
+
+if(descenso2 && ascenso2){
+
+descenso2.equipo = "B";
+ascenso2.equipo = "A";
+
+}
+  
 Object.keys(jugadores).forEach(nombre=>{
 
 jugadores[nombre].goles = 0;
