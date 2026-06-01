@@ -3,18 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Liga Milan United FC</title>
-
-<style>
-...
-</style>
-</head>
-
-<body>
-
-<h1>⚽ Liga Milan United FC ⚽</h1>
-
 
 <style>
 *{
@@ -238,12 +227,7 @@ font-weight:bold;
     <button onclick="reiniciarMes()">🏆 Terminar Mes</button>
   </div>
 
-  <span class="status" id="loginStatus"></span>
-</div>
-
-Modo visitante
-</span>
-</div>
+  <span class="status" id="loginStatus">Modo visitante</span>
 </div>
 
 <div class="card">
@@ -252,71 +236,91 @@ Modo visitante
 <div id="ultimoCampeon" class="champion"></div>
 <div id="mvpMes" class="champion"></div>
 </div>
-<div class="card">
-<h2>Equipo A</h2>
-
-<table id="tablaA">
-<thead>
-<tr>
-<th>#</th>
-<th>Jugador</th>
-<th>Goles</th>
-<th>Asist.</th>
-<th>Def.</th>
-<th>Ataj.</th>
-<th>Part.</th>
-<th>Puntos</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+  
+  <div class="card">
+  <h2>Equipo A</h2>
+  <table id="tablaA">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Jugador</th>
+        <th>Goles</th>
+        <th>Asist.</th>
+        <th>Def.</th>
+        <th>Ataj.</th>
+        <th>Part.</th>
+        <th>Puntos</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <div class="card">
-<h2>Equipo B</h2>
-
-<table id="tablaB">
-<thead>
-<tr>
-<th>Jugador</th>
-<th>Goles</th>
-<th>Asist.</th>
-<th>Def.</th>
-<th>Ataj.</th>
-<th>Part.</th>
-<th>Puntos</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+  <h2>Equipo B</h2>
+  <table id="tablaB">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Jugador</th>
+        <th>Goles</th>
+        <th>Asist.</th>
+        <th>Def.</th>
+        <th>Ataj.</th>
+        <th>Part.</th>
+        <th>Puntos</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <div class="card">
-<h2>🏅 Tabla General</h2>
-
-<table id="tablaGeneral">
-<thead>
-<tr>
-<th>#</th>
-<th>Jugador</th>
-<th>Equipo</th>
-<th>Puntos</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+  <h2>🏅 Tabla General</h2>
+  <table id="tablaGeneral">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Jugador</th>
+        <th>Equipo</th>
+        <th>Puntos</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <div class="card">
-<h2>📜 Historial de Campeones</h2>
-
-<ul id="historial"></ul>
+  <h2>📜 Historial de Campeones</h2>
+  <ul id="historial"></ul>
 </div>
 
 <footer>
 Liga Milan United FC © 2026
 </footer>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_PROYECTO.firebaseapp.com",
+  projectId: "TU_PROJECT_ID",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  
 <script>
 
 const EQUIPO_A = [
@@ -641,44 +645,37 @@ tbody.innerHTML += `
 
 }
 
-function cargarHistorial(){
+function cargarHistorial() {
 
-const historial =
-JSON.parse(
-localStorage.getItem("historialCampeones")
-) || [];
-
-const ul =
-document.getElementById("historial");
-
+const ul = document.getElementById("historial");
 ul.innerHTML = "";
 
-historial.forEach(item=>{
+db.collection("campeones").get().then(snapshot => {
 
-const li =
-document.createElement("li");
+  let data = [];
 
-li.textContent =
-`${item.fecha} - ${item.nombre} (${item.puntos} pts)`;
+  snapshot.forEach(doc => {
+    data.push(doc.data());
+  });
 
-ul.appendChild(li);
+  if(data.length === 0){
+    ul.innerHTML = "<li>No hay campeones aún</li>";
+    return;
+  }
 
+  data.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent =
+    `${item.fecha} - ${item.nombre} (${item.puntos} pts)`;
+    ul.appendChild(li);
+  });
+
+  const ultimo = data[data.length - 1];
+
+  document.getElementById("ultimoCampeon").textContent =
+  `🏆 Último campeón: ${ultimo.nombre}`;
 });
-
-if(historial.length){
-
-const ultimo =
-historial[historial.length-1];
-
-document.getElementById(
-"ultimoCampeon"
-).textContent =
-`🏆 Último campeón: ${ultimo.nombre}`;
-
 }
-
-}
-
 function actualizarMVP(){
 
 let ranking =
@@ -696,25 +693,14 @@ document.getElementById(
 
 }
 
-function guardarCampeon(nombre,puntos){
+function guardarCampeon(nombre, puntos) {
+  db.collection("campeones").add({
+    nombre,
+    puntos,
+    fecha: new Date().toLocaleDateString()
+  });
 
-const historial =
-JSON.parse(
-localStorage.getItem("historialCampeones")
-) || [];
-
-historial.push({
-nombre,
-puntos,
-fecha:new Date().toLocaleDateString()
-});
-
-localStorage.setItem(
-"historialCampeones",
-JSON.stringify(historial)
-);
-
-cargarHistorial();
+  cargarHistorial();
 }
   function reiniciarMes(){
 
@@ -813,6 +799,11 @@ renderizar();
 
 cargarHistorial();
 
+};
+  const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
 };
 
 </script>
