@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Liga Candia FC</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#0f5132,#198754);
+min-height:100vh;
+color:white;
+padding:20px;
+}
+
+h1{
+text-align:center;
+margin-bottom:20px;
+font-size:40px;
+}
+
+h2{
+margin:20px 0;
+}
+
+.container{
+max-width:1400px;
+margin:auto;
+}
+
+.card{
+background:rgba(255,255,255,.1);
+backdrop-filter:blur(10px);
+border-radius:15px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:0 0 15px rgba(0,0,0,.3);
+}
+
+button{
+background:#ffc107;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+margin:5px;
+}
+
+button:hover{
+opacity:.9;
+}
+
+input{
+padding:5px;
+border:none;
+border-radius:5px;
+width:60px;
+text-align:center;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th{
+background:#212529;
+padding:10px;
+}
+
+td{
+padding:8px;
+border-bottom:1px solid rgba(255,255,255,.2);
+text-align:center;
+}
+
+.login-box{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+align-items:center;
+}
+
+.status{
+font-weight:bold;
+color:#ffc107;
+}
+
+.champion{
+font-size:22px;
+font-weight:bold;
+color:gold;
+}
+
+.readonly{
+opacity:.7;
+pointer-events:none;
+}
+
+footer{
+text-align:center;
+margin-top:20px;
+}
+
+.rank1{
+background:rgba(255,215,0,.25);
+}
+
+.rank2{
+background:rgba(192,192,192,.25);
+}
+
+.rank3{
+background:rgba(205,127,50,.25);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>⚽ Liga Candia FC ⚽</h1>
+
+<div class="card">
+<h2>Login Administrador</h2>
+
+<div class="login-box">
+<input type="text" id="user" placeholder="Usuario">
+<input type="password" id="pass" placeholder="Contraseña">
+<button onclick="login()">Ingresar</button>
+<button onclick="logout()">Salir</button>
+
+<span class="status" id="loginStatus">
+Modo visitante
+</span>
+</div>
+</div>
+
+<div class="card">
+<h2>Acciones</h2>
+
+<button onclick="guardarDatos()">
+💾 Guardar
+</button>
+
+<button onclick="reiniciarMes()">
+🏆 Reiniciar Mes
+</button>
+
+<div id="ultimoCampeon" class="champion"></div>
+</div>
+<div class="card">
+<h2>Equipo A</h2>
+
+<table id="tablaA">
+<thead>
+<tr>
+<th>Jugador</th>
+<th>Goles</th>
+<th>Asist.</th>
+<th>Def.</th>
+<th>Ataj.</th>
+<th>Part.</th>
+<th>Puntos</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>Equipo B</h2>
+
+<table id="tablaB">
+<thead>
+<tr>
+<th>Jugador</th>
+<th>Goles</th>
+<th>Asist.</th>
+<th>Def.</th>
+<th>Ataj.</th>
+<th>Part.</th>
+<th>Puntos</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>🏅 Tabla General</h2>
+
+<table id="tablaGeneral">
+<thead>
+<tr>
+<th>#</th>
+<th>Jugador</th>
+<th>Equipo</th>
+<th>Puntos</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>📜 Historial de Campeones</h2>
+
+<ul id="historial"></ul>
+</div>
+
+<footer>
+Liga Candia FC © 2026
+</footer>
+
+<script>
+
+const EQUIPO_A = [
+"Candia",
+"Kristian",
+"Juan Manuel",
+"Cardona",
+"Henao",
+"Juan Diego",
+"Esteban",
+"Antony",
+"Van Dijk",
+"Cruz",
+"David",
+"Santiago"
+];
+
+const EQUIPO_B = [
+"Juan Diego Hernández",
+"Dilan",
+"Jorge",
+"Juan Diego Negro",
+"Nicolas Martínez",
+"Alex",
+"Nicolas",
+"Yampier",
+"Sebas Pino",
+"Samuel",
+"Kakà"
+];
+
+const USER = "sharonf1";
+const PASS = "17091097";
+
+let admin = false;
+
+let jugadores = {};
+
+function crearJugador(nombre,equipo){
+return{
+nombre,
+equipo,
+goles:0,
+asistencias:0,
+defensas:0,
+atajadas:0,
+participaciones:0,
+puntos:0
+};
+}
+
+function iniciarDatos(){
+
+const guardado =
+localStorage.getItem("ligaDatos");
+
+if(guardado){
+
+jugadores =
+JSON.parse(guardado);
+
+return;
+}
+
+EQUIPO_A.forEach(j=>{
+jugadores[j]=crearJugador(j,"A");
+});
+
+EQUIPO_B.forEach(j=>{
+jugadores[j]=crearJugador(j,"B");
+});
+
+guardarDatos();
+}
+  function calcularPuntos(j){
+
+return (
+(j.goles * 4) +
+(j.asistencias * 3) +
+(j.defensas * 2) +
+(j.atajadas * 2) +
+(j.participaciones * 1)
+);
+
+}
+
+function guardarDatos(){
+
+localStorage.setItem(
+"ligaDatos",
+JSON.stringify(jugadores)
+);
+
+actualizarTablaGeneral();
+}
+
+function login(){
+
+const u =
+document.getElementById("user").value;
+
+const p =
+document.getElementById("pass").value;
+
+if(u===USER && p===PASS){
+
+admin = true;
+
+document.getElementById(
+"loginStatus"
+).textContent = "Administrador conectado";
+
+renderizar();
+
+}else{
+
+alert("Credenciales incorrectas");
+
+}
+
+}
+
+function logout(){
+
+admin = false;
+
+document.getElementById(
+"loginStatus"
+).textContent = "Modo visitante";
+
+renderizar();
+
+}
+
+function crearFila(jugador){
+
+const tr =
+document.createElement("tr");
+
+const disabled =
+admin ? "" : "disabled";
+
+tr.innerHTML = `
+<td>${jugador.nombre}</td>
+
+<td>
+<input
+type="number"
+min="0"
+value="${jugador.goles}"
+${disabled}
+oninput="actualizarStat('${jugador.nombre}','goles',this.value)"
+>
+</td>
+
+<td>
+<input
+type="number"
+min="0"
+value="${jugador.asistencias}"
+${disabled}
+oninput="actualizarStat('${jugador.nombre}','asistencias',this.value)"
+>
+</td>
+
+<td>
+<input
+type="number"
+min="0"
+value="${jugador.defensas}"
+${disabled}
+oninput="actualizarStat('${jugador.nombre}','defensas',this.value)"
+>
+</td>
+
+<td>
+<input
+type="number"
+min="0"
+value="${jugador.atajadas}"
+${disabled}
+oninput="actualizarStat('${jugador.nombre}','atajadas',this.value)"
+>
+</td>
+
+<td>
+<input
+type="number"
+min="0"
+value="${jugador.participaciones}"
+${disabled}
+oninput="actualizarStat('${jugador.nombre}','participaciones',this.value)"
+>
+</td>
+
+<td>${jugador.puntos}</td>
+`;
+
+return tr;
+}
+
+function actualizarStat(
+nombre,
+campo,
+valor
+){
+
+jugadores[nombre][campo] =
+parseInt(valor) || 0;
+
+jugadores[nombre].puntos =
+calcularPuntos(jugadores[nombre]);
+
+guardarDatos();
+
+renderizar();
+}
+  function renderizar(){
+
+const bodyA =
+document.querySelector(
+"#tablaA tbody"
+);
+
+const bodyB =
+document.querySelector(
+"#tablaB tbody"
+);
+
+bodyA.innerHTML = "";
+bodyB.innerHTML = "";
+
+EQUIPO_A.forEach(nombre=>{
+
+bodyA.appendChild(
+crearFila(jugadores[nombre])
+);
+
+});
+
+EQUIPO_B.forEach(nombre=>{
+
+bodyB.appendChild(
+crearFila(jugadores[nombre])
+);
+
+});
+
+actualizarTablaGeneral();
+
+}
+
+function actualizarTablaGeneral(){
+
+const tbody =
+document.querySelector(
+"#tablaGeneral tbody"
+);
+
+tbody.innerHTML = "";
+
+let lista =
+Object.values(jugadores)
+.sort((a,b)=>b.puntos-a.puntos);
+
+lista.forEach((j,index)=>{
+
+let clase = "";
+
+if(index===0) clase="rank1";
+if(index===1) clase="rank2";
+if(index===2) clase="rank3";
+
+tbody.innerHTML += `
+<tr class="${clase}">
+<td>${index+1}</td>
+<td>${j.nombre}</td>
+<td>${j.equipo}</td>
+<td>${j.puntos}</td>
+</tr>
+`;
+
+});
+
+}
+
+function cargarHistorial(){
+
+const historial =
+JSON.parse(
+localStorage.getItem("historialCampeones")
+) || [];
+
+const ul =
+document.getElementById("historial");
+
+ul.innerHTML = "";
+
+historial.forEach(item=>{
+
+const li =
+document.createElement("li");
+
+li.textContent =
+`${item.fecha} - ${item.nombre} (${item.puntos} pts)`;
+
+ul.appendChild(li);
+
+});
+
+if(historial.length){
+
+const ultimo =
+historial[historial.length-1];
+
+document.getElementById(
+"ultimoCampeon"
+).textContent =
+`🏆 Último campeón: ${ultimo.nombre}`;
+
+}
+
+}
+
+function guardarCampeon(nombre,puntos){
+
+const historial =
+JSON.parse(
+localStorage.getItem("historialCampeones")
+) || [];
+
+historial.push({
+nombre,
+puntos,
+fecha:new Date().toLocaleDateString()
+});
+
+localStorage.setItem(
+"historialCampeones",
+JSON.stringify(historial)
+);
+
+cargarHistorial();
+}
+  function reiniciarMes(){
+
+if(!admin){
+alert("Solo el administrador puede reiniciar.");
+return;
+}
+
+const ranking =
+Object.values(jugadores)
+.sort((a,b)=>b.puntos-a.puntos);
+
+if(ranking.length){
+
+guardarCampeon(
+ranking[0].nombre,
+ranking[0].puntos
+);
+
+}
+
+Object.keys(jugadores).forEach(nombre=>{
+
+jugadores[nombre].goles = 0;
+jugadores[nombre].asistencias = 0;
+jugadores[nombre].defensas = 0;
+jugadores[nombre].atajadas = 0;
+jugadores[nombre].participaciones = 0;
+jugadores[nombre].puntos = 0;
+
+});
+
+guardarDatos();
+renderizar();
+
+alert("Mes reiniciado correctamente.");
+
+}
+
+window.onload = ()=>{
+
+iniciarDatos();
+
+Object.values(jugadores)
+.forEach(j=>{
+
+j.puntos = calcularPuntos(j);
+
+});
+
+guardarDatos();
+
+renderizar();
+
+cargarHistorial();
+
+};
+
+</script>
+
+</div>
+
+</body>
+</html>
