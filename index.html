@@ -223,10 +223,13 @@ font-weight:bold;
     <button onclick="logout()">Salir</button>
   </div>
 
-  <div id="adminPanel" style="display:none;">
-    <button onclick="guardarDatos()">💾 Guardar</button>
-    <button onclick="reiniciarMes()">🏆 Terminar Mes</button>
-  </div>
+ <div id="adminPanel" style="display:none;">
+  <button onclick="guardarDatos()">💾 Guardar</button>
+  <button onclick="reiniciarMes()">🏆 Terminar Mes</button>
+
+  <button onclick="agregarJugador()">➕ Crear Jugador</button>
+  <button onclick="eliminarJugador()">❌ Eliminar Jugador</button>
+</div>
 
   <span class="status" id="loginStatus">Modo visitante</span>
 </div>
@@ -706,7 +709,7 @@ document.getElementById(
 
 }
 
-  function reiniciarMes(){
+async function reiniciarMes(){
 
 if(!admin){
 alert("Solo el administrador puede reiniciar.");
@@ -719,11 +722,11 @@ Object.values(jugadores)
 
 if(ranking.length){
 
-guardarCampeon(
+await guardarCampeon(
 ranking[0].nombre,
 ranking[0].puntos
 );
-
+  
 }
 
 let equipoA =
@@ -780,6 +783,39 @@ renderizar();
 
 alert("Mes reiniciado correctamente.");
 
+}
+  function agregarJugador(){
+
+  const nombre = prompt("Nombre del jugador:");
+
+  if(!nombre) return;
+
+  const equipo = prompt("Equipo (A o B):");
+
+  if(equipo !== "A" && equipo !== "B"){
+    alert("Equipo inválido");
+    return;
+  }
+
+  jugadores[nombre] = crearJugador(nombre, equipo);
+
+  guardarDatos();
+  renderizar();
+}
+
+function eliminarJugador(){
+
+  const nombre = prompt("Nombre exacto del jugador:");
+
+  if(!jugadores[nombre]){
+    alert("Jugador no encontrado");
+    return;
+  }
+
+  delete jugadores[nombre];
+
+  guardarDatos();
+  renderizar();
 }
 
 window.onload = () => {
