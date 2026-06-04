@@ -309,9 +309,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID"
+  apiKey: "AIzaSyBin3BZQABrtgCgIi7PAnumHs473JVXagc",
+  authDomain: "liga-milan-united.firebaseapp.com",
+  projectId: "liga-milan-united",
+  storageBucket: "liga-milan-united.firebasestorage.app",
+  messagingSenderId: "395474896963",
+  appId: "1:395474896963:web:a7ff5386d47db873e7ecf6",
+  measurementId: "G-7N2TTWV7VC"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -361,9 +365,6 @@ window.cargarHistorial = async function() {
 window.onload = () => {
   cargarHistorial();
 };
-
-window.cargarHistorial = cargarHistorial;
-window.guardarCampeon = guardarCampeon;
 
 </script>
 
@@ -690,37 +691,6 @@ tbody.innerHTML += `
 
 }
 
-function cargarHistorial() {
-
-const ul = document.getElementById("historial");
-ul.innerHTML = "";
-
-db.collection("campeones").get().then(snapshot => {
-
-  let data = [];
-
-  snapshot.forEach(doc => {
-    data.push(doc.data());
-  });
-
-  if(data.length === 0){
-    ul.innerHTML = "<li>No hay campeones aún</li>";
-    return;
-  }
-
-  data.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent =
-    `${item.fecha} - ${item.nombre} (${item.puntos} pts)`;
-    ul.appendChild(li);
-  });
-
-  const ultimo = data[data.length - 1];
-
-  document.getElementById("ultimoCampeon").textContent =
-  `🏆 Último campeón: ${ultimo.nombre}`;
-});
-}
 function actualizarMVP(){
 
 let ranking =
@@ -738,15 +708,6 @@ document.getElementById(
 
 }
 
-function guardarCampeon(nombre, puntos) {
-  db.collection("campeones").add({
-    nombre,
-    puntos,
-    fecha: new Date().toLocaleDateString()
-  });
-
-  cargarHistorial();
-}
   function reiniciarMes(){
 
 if(!admin){
@@ -767,8 +728,6 @@ ranking[0].puntos
 
 }
 
-/* ASCENSOS Y DESCENSOS */
-
 let equipoA =
 Object.values(jugadores)
 .filter(j=>j.equipo==="A")
@@ -779,7 +738,6 @@ Object.values(jugadores)
 .filter(j=>j.equipo==="B")
 .sort((a,b)=>b.puntos-a.puntos);
 
-/* 2 últimos del A */
 
 let descenso1 =
 equipoA[equipoA.length - 1];
@@ -787,7 +745,6 @@ equipoA[equipoA.length - 1];
 let descenso2 =
 equipoA[equipoA.length - 2];
 
-/* 2 primeros del B */
 
 let ascenso1 =
 equipoB[0];
@@ -828,26 +785,23 @@ alert("Mes reiniciado correctamente.");
 }
 
 window.onload = () => {
+
   iniciarDatos();
-};
 
-Object.values(jugadores)
-.forEach(j=>{
+  Object.values(jugadores).forEach(j => {
+    j.puntos = calcularPuntos(j);
+  });
 
-j.puntos = calcularPuntos(j);
+  guardarDatos();
 
-});
+  renderizar();
 
-guardarDatos();
-
-renderizar();
-
-cargarHistorial();
+  if (window.cargarHistorial) {
+    window.cargarHistorial();
+  }
 
 };
-
 </script>
-
 </div>
 
 </body>
