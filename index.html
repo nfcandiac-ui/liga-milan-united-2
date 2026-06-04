@@ -122,6 +122,30 @@ background:rgba(192,192,192,.25);
 .rank3{
 background:rgba(205,127,50,.25);
 }
+
+.header{
+text-align:center;
+margin-bottom:20px;
+}
+
+.escudo{
+width:180px;
+height:auto;
+margin-bottom:10px;
+filter:drop-shadow(0 0 20px red);
+animation: brilloEscudo 2s infinite alternate;
+}
+
+@keyframes brilloEscudo{
+from{
+transform:scale(1);
+filter:drop-shadow(0 0 10px red);
+}
+to{
+transform:scale(1.05);
+filter:drop-shadow(0 0 30px red);
+}
+}
   /* RESPONSIVE PARA CELULAR */
 
 @media (max-width: 768px){
@@ -157,13 +181,14 @@ align-items:stretch;
 button{
 width:100%;
 }
-
+  
 /* EQUIPO A */
 
 .oro{
 background:gold !important;
 color:black;
 font-weight:bold;
+animation: campeon 1.5s infinite alternate;
 }
 
 .plata{
@@ -175,11 +200,13 @@ font-weight:bold;
 .descenso{
 background:#ff8a8a !important;
 font-weight:bold;
+animation: descenso 1s infinite alternate;
 }
 
 .descenso2{
 background:#dc3545 !important;
 font-weight:bold;
+animation: descenso 1s infinite alternate;
 }
 
 /* EQUIPO B */
@@ -188,12 +215,50 @@ font-weight:bold;
 background:#90EE90 !important;
 color:black;
 font-weight:bold;
+animation: ascenso 1s infinite alternate;
 }
 
 .ascenso2{
 background:#7CFC00 !important;
 color:black;
 font-weight:bold;
+animation: ascenso 1s infinite alternate;
+}
+
+/* ANIMACIÓN CAMPEÓN */
+
+@keyframes campeon{
+from{
+box-shadow:0 0 10px gold;
+}
+to{
+box-shadow:0 0 30px gold;
+transform:scale(1.02);
+}
+}
+
+/* ANIMACIÓN DESCENSO */
+
+@keyframes descenso{
+from{
+background:#ff8a8a;
+}
+to{
+background:#dc3545;
+color:white;
+}
+}
+
+/* ANIMACIÓN ASCENSO */
+
+@keyframes ascenso{
+from{
+background:#90EE90;
+}
+to{
+background:#00ff66;
+box-shadow:0 0 20px #00ff66;
+}
 }
 
 /* TABLA GENERAL */
@@ -203,6 +268,10 @@ background:#cd7f32 !important;
 font-weight:bold;
 }
 
+  .escudo{
+width:120px;
+}
+  
 }
 </style>
 </head>
@@ -210,7 +279,10 @@ font-weight:bold;
 <body>
 
 <div class="container">
-
+<div class="header">
+  <img src="escudo.png" alt="Escudo Milan United" class="escudo">
+  <h1>Liga Milan United FC</h1>
+</div>
 
 <div class="card">
   <h2>Login Administrador</h2>
