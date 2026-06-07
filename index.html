@@ -301,6 +301,7 @@ width:120px;
 
   <button onclick="agregarJugador()">➕ Crear Jugador</button>
   <button onclick="eliminarJugador()">❌ Eliminar Jugador</button>
+   <button onclick="eliminarCampeones()">🗑️ Borrar Campeones</button>
 </div>
 
   <span class="status" id="loginStatus">Modo visitante</span>
@@ -377,13 +378,15 @@ Liga Milan United FC © 2026
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  getDocs 
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-
+  
 const firebaseConfig = {
   apiKey: "AIzaSyBin3BZQABrtgCgIi7PAnumHs473JVXagc",
   authDomain: "liga-milan-united.firebaseapp.com",
@@ -436,6 +439,36 @@ window.cargarHistorial = async function() {
 
   document.getElementById("ultimoCampeon").textContent =
   `🏆 Último campeón: ${ultimo.nombre}`;
+};
+  
+  window.eliminarCampeones = async function(){
+
+  if(!confirm("¿Eliminar todo el historial de campeones?")){
+    return;
+  }
+
+  const snapshot = await getDocs(
+    collection(db, "campeones")
+  );
+
+  const promesas = [];
+
+  snapshot.forEach(item => {
+    promesas.push(
+      deleteDoc(
+        doc(db, "campeones", item.id)
+      )
+    );
+  });
+
+  await Promise.all(promesas);
+
+  document.getElementById("historial").innerHTML =
+  "<li>No hay campeones aún</li>";
+
+  document.getElementById("ultimoCampeon").textContent = "";
+
+  alert("Historial eliminado correctamente.");
 };
 
 
