@@ -987,6 +987,7 @@ jugadores[nombre].puntos = 0;
 
 guardarDatos();
 renderizar();
+renderizarHistorialMovimientos();
 
 alert("Mes reiniciado correctamente.");
 
@@ -1051,6 +1052,39 @@ function eliminarJugador(){
   renderizar();
 }
 
+function renderizarHistorialMovimientos(){
+
+const ul =
+document.getElementById("historialMovimientos");
+
+if(!ul) return;
+
+ul.innerHTML = "";
+
+if(historialMovimientos.length === 0){
+
+ul.innerHTML =
+"<li>No hay movimientos registrados.</li>";
+
+return;
+}
+
+historialMovimientos
+.slice()
+.reverse()
+.forEach(item=>{
+
+const li =
+document.createElement("li");
+
+li.textContent = item;
+
+ul.appendChild(li);
+
+});
+
+}
+  
 window.onload = () => {
 
   iniciarDatos();
@@ -1062,6 +1096,8 @@ window.onload = () => {
   guardarDatos();
 
   renderizar();
+
+  renderizarHistorialMovimientos();
 
   if (window.cargarHistorial) {
     window.cargarHistorial();
