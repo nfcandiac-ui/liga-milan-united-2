@@ -387,6 +387,9 @@ width:120px;
 
 <div id="ultimoCampeon" class="champion"></div>
 <div id="mvpMes" class="champion"></div>
+  <div id="goleadorMes" class="champion"></div>
+<div id="asistidorMes" class="champion"></div>
+<div id="porteroMes" class="champion"></div>
 </div>
   
   <div class="card">
@@ -835,6 +838,7 @@ bodyB.appendChild(fila);
 
 actualizarTablaGeneral();
 actualizarMVP();
+actualizarPremios();
 
 }
 
@@ -983,6 +987,32 @@ alert("Mes reiniciado correctamente.");
   renderizar();
 }
 
+function actualizarPremios(){
+
+let lista = Object.values(jugadores);
+
+if(!lista.length) return;
+
+let goleador =
+[...lista].sort((a,b)=>b.goles-a.goles)[0];
+
+let asistidor =
+[...lista].sort((a,b)=>b.asistencias-a.asistencias)[0];
+
+let portero =
+[...lista].sort((a,b)=>b.atajadas-a.atajadas)[0];
+
+document.getElementById("goleadorMes").innerHTML =
+`⚽ Goleador: ${goleador.nombre} (${goleador.goles} goles)`;
+
+document.getElementById("asistidorMes").innerHTML =
+`🎯 Asistidor: ${asistidor.nombre} (${asistidor.asistencias} asistencias)`;
+
+document.getElementById("porteroMes").innerHTML =
+`🧤 Portero: ${portero.nombre} (${portero.atajadas} atajadas)`;
+
+}
+  
 function eliminarJugador(){
 
   const nombre = prompt("Nombre exacto del jugador:");
