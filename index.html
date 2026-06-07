@@ -373,10 +373,10 @@ width:120px;
 
  <div id="adminPanel" style="display:none;">
   <button onclick="guardarDatos()">💾 Guardar</button>
-  <button onclick="agregarJugador()">➕ Crear Jugador</button>
-  <button onclick="eliminarJugador()">❌ Eliminar Jugador</button>
+   <button onclick="agregarJugador()">➕ Crear Jugador</button>
+    <button onclick="eliminarJugador()">❌ Eliminar Jugador</button>
    <button onclick="reiniciarMes()">🏆 Terminar Mes</button>
-   <button onclick="eliminarCampeones()">🗑️ Borrar Campeones</button>
+  <button onclick="eliminarCampeones()">🗑️ Borrar Campeones</button>
 </div>
 
   <span class="status" id="loginStatus">Modo visitante</span>
@@ -387,7 +387,7 @@ width:120px;
 
 <div id="ultimoCampeon" class="champion"></div>
 <div id="mvpMes" class="champion"></div>
-  <div id="goleadorMes" class="champion"></div>
+<div id="goleadorMes" class="champion"></div>
 <div id="asistidorMes" class="champion"></div>
 <div id="porteroMes" class="champion"></div>
 </div>
@@ -450,6 +450,11 @@ width:120px;
   <ul id="historial"></ul>
 </div>
 
+<div class="card">
+  <h2>🔄 Historial de Ascensos y Descensos</h2>
+  <ul id="historialMovimientos"></ul>
+</div>
+  
 <footer>
 Liga Milan United FC © 2026
 </footer>
@@ -589,6 +594,9 @@ const PASS = "17091097";
 let admin = false;
 
 let jugadores = {};
+
+  let historialMovimientos =
+JSON.parse(localStorage.getItem("historialMovimientos")) || [];
 
 function crearJugador(nombre,equipo){
 return{
@@ -936,6 +944,21 @@ equipoB[0];
 
 let ascenso2 =
 equipoB[1];
+
+  const fecha = new Date().toLocaleDateString();
+
+historialMovimientos.push(
+`${fecha} ➡️ ${ascenso1.nombre} y ${ascenso2.nombre} ascendieron al Equipo A`
+);
+
+historialMovimientos.push(
+`${fecha} ⬇️ ${descenso1.nombre} y ${descenso2.nombre} descendieron al Equipo B`
+);
+
+localStorage.setItem(
+"historialMovimientos",
+JSON.stringify(historialMovimientos)
+);
 
 if(descenso1 && ascenso1){
 
