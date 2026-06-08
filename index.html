@@ -147,7 +147,6 @@ filter:drop-shadow(0 0 30px red);
 }
 }
 
-  /* reponsive para pc */
 .oro{
 background:gold !important;
 color:black;
@@ -222,10 +221,7 @@ box-shadow:0 0 20px #00ff66;
 }
 }
   
-  /* RESPONSIVE PARA CELULAR */
-
 @media (max-width: 768px){
-
 .container{
 padding:5px;
 }
@@ -258,8 +254,6 @@ button{
 width:100%;
 }
   
-/* EQUIPO A */
-
 .oro{
 background:gold !important;
 color:black;
@@ -285,8 +279,6 @@ font-weight:bold;
 animation: descenso 1s infinite alternate;
 }
 
-/* EQUIPO B */
-
 .ascenso{
 background:#90EE90 !important;
 color:black;
@@ -301,53 +293,14 @@ font-weight:bold;
 animation: ascenso 1s infinite alternate;
 }
 
-/* ANIMACIÓN CAMPEÓN */
-
-@keyframes campeon{
-from{
-box-shadow:0 0 10px gold;
-}
-to{
-box-shadow:0 0 30px gold;
-transform:scale(1.02);
-}
-}
-
-/* ANIMACIÓN DESCENSO */
-
-@keyframes descenso{
-from{
-background:#ff8a8a;
-}
-to{
-background:#dc3545;
-color:white;
-}
-}
-
-/* ANIMACIÓN ASCENSO */
-
-@keyframes ascenso{
-from{
-background:#90EE90;
-}
-to{
-background:#00ff66;
-box-shadow:0 0 20px #00ff66;
-}
-}
-
-/* TABLA GENERAL */
-
 .bronce{
 background:#cd7f32 !important;
 font-weight:bold;
 }
 
-  .escudo{
+.escudo{
 width:120px;
-}
-  
+}  
 }
 </style>
 </head>
@@ -486,44 +439,64 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window.db = db;
 
+// NUEVO: Guarda la lista completa de jugadores en Firebase
+window.guardarLigaFirebase = async function(jugadores) {
+  try {
+    await setDoc(doc(db, "ligaDatos", "datosLiga"), { jugadores });
+  } catch (error) {
+    console.error("Error al guardar jugadores en Firebase:", error);
+  }
+};
+
+// NUEVO: Guarda el historial de movimientos en Firebase
+window.guardarMovimientosFirebase = async function(movimientos) {
+  try {
+    await setDoc(doc(db, "ligaDatos", "movimientosLiga"), { movimientos });
+  } catch (error) {
+    console.error("Error al guardar movimientos en Firebase:", error);
+  }
+};
+
+// NUEVO: Carga el historial de movimientos desde Firebase
+window.cargarMovimientosFirebase = async function() {
+  try {
+    const snapshot = await getDoc(doc(db, "ligaDatos", "movimientosLiga"));
+    if (snapshot.exists()) {
+      return snapshot.data().movimientos || [];
+    }
+  } catch (error) {
+    console.error("Error al cargar movimientos de Firebase:", error);
+  }
+  return [];
+};
+
 window.guardarCampeon = async function(nombre, puntos) {
   await addDoc(collection(db, "campeones"), {
     nombre,
     puntos,
     fecha: new Date().toLocaleDateString()
   });
-
-  cargarHistorial();
+  window.cargarHistorial();
 };
 
 window.cargarLigaFirebase = async function(){
-
-  const snapshot = await getDoc(
-    doc(db, "ligaDatos", "datosLiga")
-  );
-
+  const snapshot = await getDoc(doc(db, "ligaDatos", "datosLiga"));
   if(snapshot.exists()){
-
     const data = snapshot.data();
-
     if(data.jugadores){
       return data.jugadores;
     }
-
   }
-
   return null;
-
 };
 
 window.cargarHistorial = async function() {
   const ul = document.getElementById("historial");
+  if(!ul) return;
   ul.innerHTML = "";
 
   const snapshot = await getDocs(collection(db, "campeones"));
-
   let data = [];
-
   snapshot.forEach(doc => {
     data.push(doc.data());
   });
@@ -540,618 +513,327 @@ window.cargarHistorial = async function() {
   });
 
   const ultimo = data[data.length - 1];
-
-  document.getElementById("ultimoCampeon").textContent =
-  `🏆 Último campeón: ${ultimo.nombre}`;
+  document.getElementById("ultimoCampeon").textContent = `🏆 Último campeón: ${ultimo.nombre}`;
 };
   
-  window.eliminarCampeones = async function(){
-
+window.eliminarCampeones = async function(){
   if(!confirm("¿Eliminar todo el historial de campeones?")){
     return;
   }
-
-  const snapshot = await getDocs(
-    collection(db, "campeones")
-  );
-
+  const snapshot = await getDocs(collection(db, "campeones"));
   const promesas = [];
-
   snapshot.forEach(item => {
-    promesas.push(
-      deleteDoc(
-        doc(db, "campeones", item.id)
-      )
-    );
+    promesas.push(deleteDoc(doc(db, "campeones", item.id)));
   });
-
   await Promise.all(promesas);
 
-  document.getElementById("historial").innerHTML =
-  "<li>No hay campeones aún</li>";
-
+  document.getElementById("historial").innerHTML = "<li>No hay campeones aún</li>";
   document.getElementById("ultimoCampeon").textContent = "";
-
   alert("Historial eliminado correctamente.");
 };
-
-
 </script>
 
 <script>
-
-const EQUIPO_A = [
-"Candia",
-"Kristian",
-"Juan Manuel",
-"Cardona",
-"Henao",
-"Juan Diego",
-"Esteban",
-"Antony",
-"Van Dijk",
-"Cruz",
-"David",
-"Santiago"
-];
-
-const EQUIPO_B = [
-"Juan Diego Hernández",
-"Dilan",
-"Jorge",
-"Juan Diego Negro",
-"Nicolas Martínez",
-"Alex",
-"Nicolas",
-"Yampier",
-"Sebas Pino",
-"Samuel",
-"Kakà"
-];
+const EQUIPO_A = ["Candia","Kristian","Juan Manuel","Cardona","Henao","Juan Diego","Esteban","Antony","Van Dijk","Cruz","David","Santiago"];
+const EQUIPO_B = ["Juan Diego Hernández","Dilan","Jorge","Juan Diego Negro","Nicolas Martínez","Alex","Nicolas","Yampier","Sebas Pino","Samuel","Kakà"];
 
 const USER = "sharonf1";
 const PASS = "17091097";
 
 let admin = false;
-
 let jugadores = {};
-
-  let historialMovimientos =
-JSON.parse(localStorage.getItem("historialMovimientos")) || [];
+let historialMovimientos = [];
 
 function crearJugador(nombre,equipo){
-return{
-nombre,
-equipo,
-goles:0,
-asistencias:0,
-defensas:0,
-atajadas:0,
-participaciones:0,
-puntos:0
-};
+  return{
+    nombre,
+    equipo,
+    goles:0,
+    asistencias:0,
+    defensas:0,
+    atajadas:0,
+    participaciones:0,
+    puntos:0
+  };
 }
 
 async function iniciarDatos(){
+  // Cargar jugadores de Firebase
+  const datosFirebase = window.cargarLigaFirebase ? await window.cargarLigaFirebase() : null;
 
-const datosFirebase =
-window.cargarLigaFirebase
-? await window.cargarLigaFirebase()
-: null;
-
-if(datosFirebase){
-
-  jugadores = datosFirebase;
-
-}else{
-
-  const guardado =
-  localStorage.getItem("ligaDatos");
-
-  if(guardado){
-
-    jugadores =
-    JSON.parse(guardado);
-
-  }else{
-
+  if(datosFirebase){
+    jugadores = datosFirebase;
+  } else {
+    // Si Firebase está vacío, inicializar con la lista predeterminada y guardar
     jugadores = {};
-
-    EQUIPO_A.forEach(j=>{
-      jugadores[j] =
-      crearJugador(j,"A");
-    });
-
-    EQUIPO_B.forEach(j=>{
-      jugadores[j] =
-      crearJugador(j,"B");
-    });
-
-    guardarDatos();
-
+    EQUIPO_A.forEach(j=>{ jugadores[j] = crearJugador(j,"A"); });
+    EQUIPO_B.forEach(j=>{ jugadores[j] = crearJugador(j,"B"); });
+    await guardarDatos();
   }
 
+  // Cargar movimientos de Firebase
+  if(window.cargarMovimientosFirebase) {
+    historialMovimientos = await window.cargarMovimientosFirebase();
+  }
+
+  renderizar();
+  renderizarHistorialMovimientos();
 }
 
-renderizar();
-
-}
-  function calcularPuntos(j){
-
-return (
-(j.goles * 4) +
-(j.asistencias * 3) +
-(j.defensas * 2) +
-(j.atajadas * 2) +
-(j.participaciones * 1)
-);
-
+function calcularPuntos(j){
+  return (
+    (j.goles * 4) +
+    (j.asistencias * 3) +
+    (j.defensas * 2) +
+    (j.atajadas * 2) +
+    (j.participaciones * 1)
+  );
 }
 
 async function guardarDatos(){
-
-localStorage.setItem(
-"ligaDatos",
-JSON.stringify(jugadores)
-);
-
-if(window.guardarLigaFirebase){
-  await window.guardarLigaFirebase(jugadores);
-}
-
-actualizarTablaGeneral();
+  if(window.guardarLigaFirebase){
+    await window.guardarLigaFirebase(jugadores);
+  }
+  actualizarTablaGeneral();
 }
 
 function login(){
+  const u = document.getElementById("user").value;
+  const p = document.getElementById("pass").value;
 
-const u =
-document.getElementById("user").value;
-
-const p =
-document.getElementById("pass").value;
-
-if(u===USER && p===PASS){
-
-admin = true;
-document.getElementById(
-"adminPanel"
-).style.display = "block";
-
-document.getElementById(
-"loginStatus"
-).textContent = "Administrador conectado";
-
-renderizar();
-
-}else{
-
-alert("Credenciales incorrectas");
-
-}
-
+  if(u===USER && p===PASS){
+    admin = true;
+    document.getElementById("adminPanel").style.display = "block";
+    document.getElementById("loginStatus").textContent = "Administrador conectado";
+    renderizar();
+  }else{
+    alert("Credenciales incorrectas");
+  }
 }
 
 function logout(){
-
-admin = false;
-document.getElementById(
-"adminPanel"
-).style.display = "none";
-
-document.getElementById(
-"loginStatus"
-).textContent = "Modo visitante";
-
-renderizar();
-
+  admin = false;
+  document.getElementById("adminPanel").style.display = "none";
+  document.getElementById("loginStatus").textContent = "Modo visitante";
+  renderizar();
 }
 
 function crearFila(jugador,posicion){
+  const tr = document.createElement("tr");
+  const disabled = admin ? "" : "disabled";
 
-const tr =
-document.createElement("tr");
-
-const disabled =
-admin ? "" : "disabled";
-
-tr.innerHTML = `
-<td>${posicion}</td>
-<td>${jugador.nombre}</td>
-
-<td>
-<input
-type="number"
-min="0"
-value="${jugador.goles}"
-${disabled}
-oninput="actualizarStat('${jugador.nombre}','goles',this.value)"
->
-</td>
-
-<td>
-<input
-type="number"
-min="0"
-value="${jugador.asistencias}"
-${disabled}
-oninput="actualizarStat('${jugador.nombre}','asistencias',this.value)"
->
-</td>
-
-<td>
-<input
-type="number"
-min="0"
-value="${jugador.defensas}"
-${disabled}
-oninput="actualizarStat('${jugador.nombre}','defensas',this.value)"
->
-</td>
-
-<td>
-<input
-type="number"
-min="0"
-value="${jugador.atajadas}"
-${disabled}
-oninput="actualizarStat('${jugador.nombre}','atajadas',this.value)"
->
-</td>
-
-<td>
-<input
-type="number"
-min="0"
-value="${jugador.participaciones}"
-${disabled}
-oninput="actualizarStat('${jugador.nombre}','participaciones',this.value)"
->
-</td>
-
-<td>${jugador.puntos}</td>
-`;
-
-return tr;
+  tr.innerHTML = `
+    <td>${posicion}</td>
+    <td>${jugador.nombre}</td>
+    <td><input type="number" min="0" value="${jugador.goles}" ${disabled} oninput="actualizarStat('${jugador.nombre}','goles',this.value)"></td>
+    <td><input type="number" min="0" value="${jugador.asistencias}" ${disabled} oninput="actualizarStat('${jugador.nombre}','asistencias',this.value)"></td>
+    <td><input type="number" min="0" value="${jugador.defensas}" ${disabled} oninput="actualizarStat('${jugador.nombre}','defensas',this.value)"></td>
+    <td><input type="number" min="0" value="${jugador.atajadas}" ${disabled} oninput="actualizarStat('${jugador.nombre}','atajadas',this.value)"></td>
+    <td><input type="number" min="0" value="${jugador.participaciones}" ${disabled} oninput="actualizarStat('${jugador.nombre}','participaciones',this.value)"></td>
+    <td>${jugador.puntos}</td>
+  `;
+  return tr;
 }
 
-function actualizarStat(
-nombre,
-campo,
-valor
-){
-
-jugadores[nombre][campo] =
-parseInt(valor) || 0;
-
-jugadores[nombre].puntos =
-calcularPuntos(jugadores[nombre]);
-
-guardarDatos();
-
-renderizar();
+function actualizarStat(nombre, campo, valor){
+  jugadores[nombre][campo] = parseInt(valor) || 0;
+  jugadores[nombre].puntos = calcularPuntos(jugadores[nombre]);
+  // Se autoguarda en Firebase al cambiar un input (si eres admin)
+  guardarDatos();
+  renderizar();
 }
- function renderizar(){
 
-const bodyA =
-document.querySelector("#tablaA tbody");
+function renderizar(){
+  const bodyA = document.querySelector("#tablaA tbody");
+  const bodyB = document.querySelector("#tablaB tbody");
+  if(!bodyA || !bodyB) return;
 
-const bodyB =
-document.querySelector("#tablaB tbody");
+  bodyA.innerHTML = "";
+  bodyB.innerHTML = "";
 
-bodyA.innerHTML = "";
-bodyB.innerHTML = "";
+  let rankingA = Object.values(jugadores).filter(j=>j.equipo==="A").sort((a,b)=>b.puntos-a.puntos);
+  rankingA.forEach((jugador,index)=>{
+    let fila = crearFila(jugador,index+1);
+    if(index===0) fila.classList.add("oro");
+    if(index===1) fila.classList.add("plata");
+    if(index===rankingA.length - 2) fila.classList.add("descenso");
+    if(index===rankingA.length - 1) fila.classList.add("descenso2");
+    bodyA.appendChild(fila);
+  });
 
-/* EQUIPO A ORDENADO */
+  let rankingB = Object.values(jugadores).filter(j=>j.equipo==="B").sort((a,b)=>b.puntos-a.puntos);
+  rankingB.forEach((jugador,index)=>{
+    let fila = crearFila(jugador,index+1);
+    if(index===0) fila.classList.add("ascenso");
+    if(index===1) fila.classList.add("ascenso2");
+    bodyB.appendChild(fila);
+  });
 
-let rankingA =
-Object.values(jugadores)
-.filter(j=>j.equipo==="A")
-.sort((a,b)=>b.puntos-a.puntos);
-
-rankingA.forEach((jugador,index)=>{
-
-let fila =
-crearFila(jugador,index+1);
-
-if(index===0)
-fila.classList.add("oro");
-
-if(index===1)
-fila.classList.add("plata");
-
-if(index===10)
-fila.classList.add("descenso");
-
-if(index===11)
-fila.classList.add("descenso2");
-
-bodyA.appendChild(fila);
-
-});
-
-/* EQUIPO B ORDENADO */
-
-let rankingB =
-Object.values(jugadores)
-.filter(j=>j.equipo==="B")
-.sort((a,b)=>b.puntos-a.puntos);
-
-rankingB.forEach((jugador,index)=>{
-
-let fila =
-crearFila(jugador,index+1);
-
-if(index===0)
-fila.classList.add("ascenso");
-
-if(index===1)
-fila.classList.add("ascenso2");
-
-bodyB.appendChild(fila);
-
-});
-
-actualizarTablaGeneral();
-actualizarMVP();
-actualizarPremios();
-
+  actualizarTablaGeneral();
+  actualizarMVP();
+  actualizarPremios();
 }
 
 function actualizarTablaGeneral(){
+  const tbody = document.querySelector("#tablaGeneral tbody");
+  if(!tbody) return;
+  tbody.innerHTML = "";
 
-const tbody =
-document.querySelector(
-"#tablaGeneral tbody"
-);
+  let lista = Object.values(jugadores).sort((a,b)=>b.puntos-a.puntos);
+  lista.forEach((j,index)=>{
+    let clase = "";
+    if(index===0) clase="oro";
+    if(index===1) clase="plata";
+    if(index===2) clase="bronce";
 
-tbody.innerHTML = "";
-
-let lista =
-Object.values(jugadores)
-.sort((a,b)=>b.puntos-a.puntos);
-
-lista.forEach((j,index)=>{
-
-let clase = "";
-
-if(index===0) clase="oro";
-if(index===1) clase="plata";
-if(index===2) clase="bronce";
-
-tbody.innerHTML += `
-<tr class="${clase}">
-<td>${index+1}</td>
-<td>${j.nombre}</td>
-<td>${j.equipo}</td>
-<td>${j.puntos}</td>
-</tr>
-`;
-
-});
-
+    tbody.innerHTML += `
+      <tr class="${clase}">
+        <td>${index+1}</td>
+        <td>${j.nombre}</td>
+        <td>${j.equipo}</td>
+        <td>${j.puntos}</td>
+      </tr>
+    `;
+  });
 }
 
 function actualizarMVP(){
-
-let ranking =
-Object.values(jugadores)
-.sort((a,b)=>b.puntos-a.puntos);
-
-if(ranking.length){
-
-document.getElementById(
-"mvpMes"
-).innerHTML =
-`⭐ MVP Actual: ${ranking[0].nombre} (${ranking[0].puntos} pts)`;
-
-}
-
+  let ranking = Object.values(jugadores).sort((a,b)=>b.puntos-a.puntos);
+  if(ranking.length){
+    document.getElementById("mvpMes").innerHTML = `⭐ MVP Actual: ${ranking[0].nombre} (${ranking[0].puntos} pts)`;
+  }
 }
 
 async function reiniciarMes(){
+  if(!admin){
+    alert("Solo el administrador puede reiniciar.");
+    return;
+  }
 
-if(!admin){
-alert("Solo el administrador puede reiniciar.");
-return;
-}
+  const ranking = Object.values(jugadores).sort((a,b)=>b.puntos-a.puntos);
+  if(ranking.length){
+    await window.guardarCampeon(ranking[0].nombre, ranking[0].puntos);
+  }
 
-const ranking =
-Object.values(jugadores)
-.sort((a,b)=>b.puntos-a.puntos);
+  let equipoA = Object.values(jugadores).filter(j=>j.equipo==="A").sort((a,b)=>b.puntos-a.puntos);
+  let equipoB = Object.values(jugadores).filter(j=>j.equipo==="B").sort((a,b)=>b.puntos-a.puntos);
 
-if(ranking.length){
-
-await guardarCampeon(
-ranking[0].nombre,
-ranking[0].puntos
-);
-  
-}
-
-let equipoA =
-Object.values(jugadores)
-.filter(j=>j.equipo==="A")
-.sort((a,b)=>b.puntos-a.puntos);
-
-let equipoB =
-Object.values(jugadores)
-.filter(j=>j.equipo==="B")
-.sort((a,b)=>b.puntos-a.puntos);
-
-
-let descenso1 =
-equipoA[equipoA.length - 1];
-
-let descenso2 =
-equipoA[equipoA.length - 2];
-
-
-let ascenso1 =
-equipoB[0];
-
-let ascenso2 =
-equipoB[1];
+  let descenso1 = equipoA[equipoA.length - 1];
+  let descenso2 = equipoA[equipoA.length - 2];
+  let ascenso1 = equipoB[0];
+  let ascenso2 = equipoB[1];
 
   const fecha = new Date().toLocaleDateString();
 
-historialMovimientos.push(
-`${fecha} ➡️ ${ascenso1.nombre} y ${ascenso2.nombre} ascendieron al Equipo A`
-);
+  if(ascenso1 && ascenso2) {
+    historialMovimientos.push(`${fecha} ➡️ ${ascenso1.nombre} y ${ascenso2.nombre} ascendieron al Equipo A`);
+  }
+  if(descenso1 && descenso2) {
+    historialMovimientos.push(`${fecha} ⬇️ ${descenso1.nombre} y ${descenso2.nombre} descendieron al Equipo B`);
+  }
 
-historialMovimientos.push(
-`${fecha} ⬇️ ${descenso1.nombre} y ${descenso2.nombre} descendieron al Equipo B`
-);
+  // Guardar movimientos en Firebase
+  if(window.guardarMovimientosFirebase) {
+    await window.guardarMovimientosFirebase(historialMovimientos);
+  }
 
-localStorage.setItem(
-"historialMovimientos",
-JSON.stringify(historialMovimientos)
-);
+  if(descenso1 && ascenso1){
+    descenso1.equipo = "B";
+    ascenso1.equipo = "A";
+  }
+  if(descenso2 && ascenso2){
+    descenso2.equipo = "B";
+    ascenso2.equipo = "A";
+  }
+    
+  Object.keys(jugadores).forEach(nombre=>{
+    jugadores[nombre].goles = 0;
+    jugadores[nombre].asistencias = 0;
+    jugadores[nombre].defensas = 0;
+    jugadores[nombre].atajadas = 0;
+    jugadores[nombre].participaciones = 0;
+    jugadores[nombre].puntos = 0;
+  });
 
-if(descenso1 && ascenso1){
+  await guardarDatos();
+  renderizar();
+  renderizarHistorialMovimientos();
 
-descenso1.equipo = "B";
-ascenso1.equipo = "A";
-
+  alert("Mes reiniciado correctamente.");
 }
 
-if(descenso2 && ascenso2){
-
-descenso2.equipo = "B";
-ascenso2.equipo = "A";
-
-}
-  
-Object.keys(jugadores).forEach(nombre=>{
-
-jugadores[nombre].goles = 0;
-jugadores[nombre].asistencias = 0;
-jugadores[nombre].defensas = 0;
-jugadores[nombre].atajadas = 0;
-jugadores[nombre].participaciones = 0;
-jugadores[nombre].puntos = 0;
-
-});
-
-guardarDatos();
-renderizar();
-renderizarHistorialMovimientos();
-
-alert("Mes reiniciado correctamente.");
-
-}
-  function agregarJugador(){
-
+async function agregarJugador(){
   const nombre = prompt("Nombre del jugador:");
-
   if(!nombre) return;
 
   const equipo = prompt("Equipo (A o B):");
-
   if(equipo !== "A" && equipo !== "B"){
     alert("Equipo inválido");
     return;
   }
 
   jugadores[nombre] = crearJugador(nombre, equipo);
-
-  guardarDatos();
+  await guardarDatos();
   renderizar();
 }
 
 function actualizarPremios(){
+  let lista = Object.values(jugadores);
+  if(!lista.length) return;
 
-let lista = Object.values(jugadores);
+  let goleador = [...lista].sort((a,b)=>b.goles-a.goles)[0];
+  let asistidor = [...lista].sort((a,b)=>b.asistencias-a.asistencias)[0];
+  let portero = [...lista].sort((a,b)=>b.atajadas-a.atajadas)[0];
 
-if(!lista.length) return;
-
-let goleador =
-[...lista].sort((a,b)=>b.goles-a.goles)[0];
-
-let asistidor =
-[...lista].sort((a,b)=>b.asistencias-a.asistencias)[0];
-
-let portero =
-[...lista].sort((a,b)=>b.atajadas-a.atajadas)[0];
-
-document.getElementById("goleadorMes").innerHTML =
-`⚽ Goleador: ${goleador.nombre} (${goleador.goles} goles)`;
-
-document.getElementById("asistidorMes").innerHTML =
-`🎯 Asistidor: ${asistidor.nombre} (${asistidor.asistencias} asistencias)`;
-
-document.getElementById("porteroMes").innerHTML =
-`🧤 Portero: ${portero.nombre} (${portero.atajadas} atajadas)`;
-
+  document.getElementById("goleadorMes").innerHTML = `⚽ Goleador: ${goleador.nombre} (${goleador.goles} goles)`;
+  document.getElementById("asistidorMes").innerHTML = `🎯 Asistidor: ${asistidor.nombre} (${asistidor.asistencias} asistencias)`;
+  document.getElementById("porteroMes").innerHTML = `🧤 Portero: ${portero.nombre} (${portero.atajadas} atajadas)`;
 }
   
-function eliminarJugador(){
-
+async function eliminarJugador(){
   const nombre = prompt("Nombre exacto del jugador:");
-
   if(!jugadores[nombre]){
     alert("Jugador no encontrado");
     return;
   }
 
   delete jugadores[nombre];
-
-  guardarDatos();
+  await guardarDatos();
   renderizar();
 }
 
 function renderizarHistorialMovimientos(){
+  const ul = document.getElementById("historialMovimientos");
+  if(!ul) return;
+  ul.innerHTML = "";
 
-const ul =
-document.getElementById("historialMovimientos");
+  if(historialMovimientos.length === 0){
+    ul.innerHTML = "<li>No hay movimientos registrados.</li>";
+    return;
+  }
 
-if(!ul) return;
-
-ul.innerHTML = "";
-
-if(historialMovimientos.length === 0){
-
-ul.innerHTML =
-"<li>No hay movimientos registrados.</li>";
-
-return;
-}
-
-historialMovimientos
-.slice()
-.reverse()
-.forEach(item=>{
-
-const li =
-document.createElement("li");
-
-li.textContent = item;
-
-ul.appendChild(li);
-
-});
-
+  historialMovimientos.slice().reverse().forEach(item=>{
+    const li = document.createElement("li");
+    li.textContent = item;
+    ul.appendChild(li);
+  });
 }
   
 window.onload = async () => {
-
   await iniciarDatos();
 
   Object.values(jugadores).forEach(j => {
     j.puntos = calcularPuntos(j);
   });
 
-  guardarDatos();
-
+  await guardarDatos();
   renderizar();
-
   renderizarHistorialMovimientos();
 
   if (window.cargarHistorial) {
-    window.cargarHistorial();
+    await window.cargarHistorial();
   }
-
 };
-  
 </script>
 </div>
 
