@@ -459,17 +459,19 @@ width:120px;
 Liga Milan United FC © 2026
 </footer>
 
-<script type="module">
+<script type="module"> 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
   getFirestore,
   collection,
   addDoc,
   getDocs,
+  getDoc,
+  setDoc,
   deleteDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-  
+    
 const firebaseConfig = {
   apiKey: "AIzaSyBin3BZQABrtgCgIi7PAnumHs473JVXagc",
   authDomain: "liga-milan-united.firebaseapp.com",
@@ -494,19 +496,23 @@ window.guardarCampeon = async function(nombre, puntos) {
   cargarHistorial();
 };
 
-  window.guardarLigaFirebase = async function(jugadores){
+window.cargarLigaFirebase = async function(){
 
-  const { setDoc } = await import(
-    "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js"
+  const snapshot = await getDoc(
+    doc(db, "ligaDatos", "datosLiga")
   );
 
-  await setDoc(
-    doc(db, "ligaDatos", "datosLiga"),
-    {
-      jugadores: jugadores,
-      ultimaActualizacion: new Date().toISOString()
+  if(snapshot.exists()){
+
+    const data = snapshot.data();
+
+    if(data.jugadores){
+      return data.jugadores;
     }
-  );
+
+  }
+
+  return null;
 
 };
 
@@ -626,27 +632,49 @@ puntos:0
 };
 }
 
-function iniciarDatos(){
+async function iniciarDatos(){
 
-const guardado = localStorage.getItem("ligaDatos");
+const datosFirebase =
+window.cargarLigaFirebase
+? await window.cargarLigaFirebase()
+: null;
 
-if(guardado){
-  jugadores = JSON.parse(guardado);
-} else {
-  jugadores = {};
+if(datosFirebase){
 
-  EQUIPO_A.forEach(j=>{
-    jugadores[j] = crearJugador(j,"A");
-  });
+  jugadores = datosFirebase;
 
-  EQUIPO_B.forEach(j=>{
-    jugadores[j] = crearJugador(j,"B");
-  });
+}else{
 
-  guardarDatos();
+  const guardado =
+  localStorage.getItem("ligaDatos");
+
+  if(guardado){
+
+    jugadores =
+    JSON.parse(guardado);
+
+  }else{
+
+    jugadores = {};
+
+    EQUIPO_A.forEach(j=>{
+      jugadores[j] =
+      crearJugador(j,"A");
+    });
+
+    EQUIPO_B.forEach(j=>{
+      jugadores[j] =
+      crearJugador(j,"B");
+    });
+
+    guardarDatos();
+
+  }
+
 }
 
 renderizar();
+
 }
   function calcularPuntos(j){
 
@@ -1104,9 +1132,9 @@ ul.appendChild(li);
 
 }
   
-window.onload = () => {
+window.onload = async () => {
 
-  iniciarDatos();
+  await iniciarDatos();
 
   Object.values(jugadores).forEach(j => {
     j.puntos = calcularPuntos(j);
