@@ -449,6 +449,7 @@ window.guardarLigaFirebase = async function(jugadores) {
     await setDoc(doc(db, "ligaDatos", "datosLiga"), { jugadores });
   } catch (error) {
     console.error("Error al guardar jugadores en Firebase:", error);
+    throw error;
   }
 };
 
@@ -796,17 +797,43 @@ function actualizarPremios(){
 }
   
 async function eliminarJugador(){
-  const nombre = prompt("Nombre exacto del jugador:");
-  if(!jugadores[nombre]){
-    alert("Jugador no encontrado");
+  if(!admin){
+    alert("Primero inicia sesión como administrador.");
     return;
   }
 
-  if(!confirm("¿Retirar a " + nombre + "? Sus estadísticas se conservarán y aparecerá en la página Retirados.")) return;
-  jugadores[nombre].retirado = true;
-  await guardarDatos();
-  renderizar();
-  alert("Jugador retirado. Sus estadísticas se conservaron.");
+  const activos = Object.values(jugadores).filter(j => !j.retirado);
+  if(!activos.length){
+    alert("No hay jugadores activos para retirar.");
+    return;
+  }
+
+  const lista = activos.map(j => j.nombre).join("\n");
+  const escrito = prompt("Escribe el nombre del jugador que quieres retirar:\n\n" + lista);
+  if(escrito === null || !escrito.trim()) return;
+
+  const clave = Object.keys(jugadores).find(k =>
+    k.trim().toLocaleLowerCase("es") === escrito.trim().toLocaleLowerCase("es") &&
+    !jugadores[k].retirado
+  );
+
+  if(!clave){
+    alert("No encontré ese jugador activo. Copia el nombre tal como aparece en la lista.");
+    return;
+  }
+
+  if(!confirm("¿Retirar a " + jugadores[clave].nombre + "? Sus estadísticas se conservarán y aparecerá en la página Retirados.")) return;
+
+  try{
+    jugadores[clave].retirado = true;
+    await guardarDatos();
+    renderizar();
+    alert("Jugador retirado correctamente. Puedes verlo en la página Retirados.");
+  }catch(error){
+    jugadores[clave].retirado = false;
+    console.error("Error al retirar jugador:", error);
+    alert("No se pudo guardar el retiro en Firebase. Revisa la conexión e inténtalo de nuevo.");
+  }
 }
 
 function renderizarHistorialMovimientos(){
