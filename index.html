@@ -313,6 +313,10 @@ width:120px;
   <h1>Liga Milan United FC</h1>
 </div>
 
+<nav class="card" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+<a class="navlink" href="index.html">🏠 Inicio</a><a class="navlink" href="equipo-a.html">🅰️ Equipo A</a><a class="navlink" href="equipo-b.html">🅱️ Equipo B</a><a class="navlink" href="general.html">🏆 Tabla general</a><a class="navlink" href="estadisticas.html">📊 Estadísticas</a><a class="navlink" href="retirados.html">📁 Retirados</a>
+</nav>
+<style>.navlink{display:inline-block;background:#ffc107;color:#111;text-decoration:none;padding:10px 14px;border-radius:9px;font-weight:bold}.navlink:hover{opacity:.85}</style>
 <div class="card">
   <h2>Login Administrador</h2>
 
@@ -327,7 +331,7 @@ width:120px;
  <div id="adminPanel" style="display:none;">
   <button onclick="guardarDatos()">💾 Guardar</button>
    <button onclick="agregarJugador()">➕ Crear Jugador</button>
-    <button onclick="eliminarJugador()">❌ Eliminar Jugador</button>
+    <button onclick="eliminarJugador()">📁 Retirar Jugador</button>
    <button onclick="reiniciarMes()">🏆 Terminar Mes</button>
   <button onclick="eliminarCampeones()">🗑️ Borrar Campeones</button>
 </div>
@@ -553,7 +557,8 @@ function crearJugador(nombre,equipo){
     defensas:0,
     atajadas:0,
     participaciones:0,
-    puntos:0
+    puntos:0,
+    retirado:false
   };
 }
 
@@ -651,7 +656,7 @@ function renderizar(){
   bodyA.innerHTML = "";
   bodyB.innerHTML = "";
 
-  let rankingA = Object.values(jugadores).filter(j=>j.equipo==="A").sort((a,b)=>b.puntos-a.puntos);
+  let rankingA = Object.values(jugadores).filter(j=>j.equipo==="A" && !j.retirado).sort((a,b)=>b.puntos-a.puntos);
   rankingA.forEach((jugador,index)=>{
     let fila = crearFila(jugador,index+1);
     if(index===0) fila.classList.add("oro");
@@ -661,7 +666,7 @@ function renderizar(){
     bodyA.appendChild(fila);
   });
 
-  let rankingB = Object.values(jugadores).filter(j=>j.equipo==="B").sort((a,b)=>b.puntos-a.puntos);
+  let rankingB = Object.values(jugadores).filter(j=>j.equipo==="B" && !j.retirado).sort((a,b)=>b.puntos-a.puntos);
   rankingB.forEach((jugador,index)=>{
     let fila = crearFila(jugador,index+1);
     if(index===0) fila.classList.add("ascenso");
@@ -679,7 +684,7 @@ function actualizarTablaGeneral(){
   if(!tbody) return;
   tbody.innerHTML = "";
 
-  let lista = Object.values(jugadores).sort((a,b)=>b.puntos-a.puntos);
+  let lista = Object.values(jugadores).filter(j=>!j.retirado).sort((a,b)=>b.puntos-a.puntos);
   lista.forEach((j,index)=>{
     let clase = "";
     if(index===0) clase="oro";
@@ -698,7 +703,7 @@ function actualizarTablaGeneral(){
 }
 
 function actualizarMVP(){
-  let ranking = Object.values(jugadores).sort((a,b)=>b.puntos-a.puntos);
+  let ranking = Object.values(jugadores).filter(j=>!j.retirado).sort((a,b)=>b.puntos-a.puntos);
   if(ranking.length){
     document.getElementById("mvpMes").innerHTML = `⭐ MVP Actual: ${ranking[0].nombre} (${ranking[0].puntos} pts)`;
   }
@@ -778,7 +783,7 @@ async function agregarJugador(){
 }
 
 function actualizarPremios(){
-  let lista = Object.values(jugadores);
+  let lista = Object.values(jugadores).filter(j=>!j.retirado);
   if(!lista.length) return;
 
   let goleador = [...lista].sort((a,b)=>b.goles-a.goles)[0];
@@ -797,9 +802,11 @@ async function eliminarJugador(){
     return;
   }
 
-  delete jugadores[nombre];
+  if(!confirm("¿Retirar a " + nombre + "? Sus estadísticas se conservarán y aparecerá en la página Retirados.")) return;
+  jugadores[nombre].retirado = true;
   await guardarDatos();
   renderizar();
+  alert("Jugador retirado. Sus estadísticas se conservaron.");
 }
 
 function renderizarHistorialMovimientos(){
